@@ -122,18 +122,29 @@ docker compose logs -f
 
 The request log is kept in `./data`.
 
-#### Proxmox LXC without Docker (Debian/Ubuntu)
+#### Proxmox LXC without Docker (Debian 12+)
+
+Needs Python 3.11+ (Debian 12 and 13 have it; Ubuntu 22.04 doesn't). Run as root inside the LXC:
 
 ```sh
-apt install -y python3 python3-venv git
-useradd --system --home /opt/lidarr-bot lidarr-bot
-git clone <this repo> /opt/lidarr-bot && cd /opt/lidarr-bot
+apt update && apt install -y python3 python3-venv git
+useradd --system --user-group --home /opt/lidarr-bot --shell /usr/sbin/nologin lidarr-bot
+git clone https://github.com/<you>/lidarr-bot.git /opt/lidarr-bot
+cd /opt/lidarr-bot
 python3 -m venv .venv && .venv/bin/pip install .
 cp .env.example .env && nano .env        # fill it in
-chown -R lidarr-bot: /opt/lidarr-bot
+# Code stays owned by root (so `git pull` works); the bot only gets its data and config.
+mkdir -p data && chown lidarr-bot: data
+chown root:lidarr-bot .env && chmod 640 .env
 cp deploy/lidarr-bot.service /etc/systemd/system/
 systemctl daemon-reload && systemctl enable --now lidarr-bot
 journalctl -u lidarr-bot -f
+```
+
+To update later:
+
+```sh
+cd /opt/lidarr-bot && git pull && .venv/bin/pip install . && systemctl restart lidarr-bot
 ```
 
 The bot can run in the same LXC as Lidarr (`LIDARR_URL=http://localhost:8686`) or anywhere
