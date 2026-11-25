@@ -1,0 +1,18 @@
+# systemd unit for running the bot directly in a Proxmox LXC (no Docker).
+# Install: see README "Run in an LXC without Docker".
+[Unit]
+Description=Lidarr Discord request bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=lidarr-bot
+WorkingDirectory=/opt/lidarr-bot
+EnvironmentFile=/opt/lidarr-bot/.env
+ExecStart=/opt/lidarr-bot/.venv/bin/lidarr-bot
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

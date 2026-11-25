@@ -1,0 +1,10 @@
+services:
+  lidarr-bot:
+    build: .
+    container_name: lidarr-bot
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_PATH: /data/requests.db
+    volumes:
+      - ./data:/data
